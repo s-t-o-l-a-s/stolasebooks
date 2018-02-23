@@ -3,4 +3,7 @@ create_virtualenv:
 	./venv/bin/pip install -r requirements.txt
 
 lint:
-	flake8 bot.py
+	flake8 stolas/
+
+test:
+	PYTHONPATH=. pytest
