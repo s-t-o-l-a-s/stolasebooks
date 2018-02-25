@@ -1,4 +1,5 @@
 from collections import namedtuple
+import random
 
 Letter = namedtuple('Letter', ['character', 'count'])
 
@@ -7,11 +8,29 @@ class ParseLengthError(Exception):
     pass
 
 
+class NotParsedYetException(Exception):
+    pass
+
+
 class MarkovChain(object):
     """Hold the a chain in memory"""
 
-    def __init__(self):
+    def __init__(self, order=4):
+        """
+        Create a new MarkovChain
+
+        :param: order - Number of characters per word
+        """
+
+        if type(order) is not int:
+            raise ValueError("Order must be int!")
+
+        if order <= 0:
+            raise ValueError("Order must be greater than zero!")
+
+        self.order = order
         self._chain = {}
+        self._parsed = False
 
     def _add_word_to_chain(self, char_buffer, new_character):
         word = "".join(char_buffer)
@@ -35,23 +54,72 @@ class MarkovChain(object):
             Letter(new_character, 1)
         )
 
-    def parse(self, text, order=4):
+    def _get_random_letter(self, key):
+        """Get a weighted random Letter from the chain"""
+
+        possible_letters = []
+
+        if key not in self._chain:
+            key = ""
+
+        for letter in self._chain[key]:
+            # HACK: Do this better
+            for _ in range(letter.count):
+                possible_letters.append(letter.character)
+
+        return random.choice(possible_letters)
+
+    def parse(self, text):
         """Add text to the current chain.
 
-        :param: text - Input string
-        :param: order - Number of characters per word"""
+        :param: text - Input string"""
+
+        self._parsed = True
 
         char_buffer = []
 
-        if len(text) < order:
+        if len(text) < self.order:
             raise ParseLengthError()
 
+        # Add the first characters to empty string key
+        self._add_word_to_chain("", text[0])
+
         for ii in text:
-            if len(char_buffer) == order:
-                self._add_word_to_chain(char_buffer, ii)
+
+            # We never want to parse an @ sign
+            if ii == "@":
+                continue
+
+            if len(char_buffer) == self.order:
+                self._add_word_to_chain("".join(char_buffer), ii)
                 del char_buffer[0]
 
             char_buffer.append(ii)
 
-    def get_text(self, length=None):
+    def get_text(self, length=400):
         """Get text from this chain"""
+
+        if not self._parsed:
+            return ""
+
+        char_buffer = []
+        current_length = 0
+
+        # Start with a random key from the chain
+        # Add it to the output
+        # Take one of the Letters in values and use it
+        # Then take the current latest
+
+        key = random.choice(
+            list(self._chain.keys())
+        )
+        char_buffer.append(key)
+
+        current_length += len(key)
+
+        while len(char_buffer) < length:
+            next_character = self._get_random_letter(key)
+            char_buffer.append(next_character)
+            key = "".join(char_buffer)[-self.order:]
+
+        return "".join(char_buffer)
