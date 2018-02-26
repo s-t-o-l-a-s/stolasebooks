@@ -37,6 +37,9 @@ class StolasEbooks(ananas.PineappleBot):
 
         self.last_page = statuses
 
+        if not statuses:
+            return
+
         for status in statuses:
             # self._max_status_id = max(
             #     self._max_status_id,
@@ -57,10 +60,12 @@ class StolasEbooks(ananas.PineappleBot):
 
         text_content = ananas.html_strip_tags(toot['content'])
 
+        print("Adding a toot!")
+
         self.markov.parse(text_content)
 
     @ananas.interval(1)
     def toot(self):
         print("BANG!")
         self.get_toots()
-        # print(self.markov.get_text(300))
+        print(self.markov.get_text(300))

@@ -42,7 +42,7 @@ class MarkovChain(object):
                 # Increment the existing character
                 self._chain[word][index] = Letter(
                     new_character,
-                    existing_letters.count
+                    existing_letters.count + 1
                 )
 
                 return

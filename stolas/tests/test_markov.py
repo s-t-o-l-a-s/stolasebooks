@@ -114,6 +114,24 @@ class MarkovChainParseTestCase(unittest.TestCase):
             [Letter('f', 1)]
         )
 
+    def test_duplicate_input_not_parsed(self):
+        # Calling parse more than one should
+        # append to the existing chain
+        # but each call should be seperate
+
+        markov = MarkovChain(order=1)
+        self.assertEqual(markov._chain, {})
+
+        input_text = "abacab"
+
+        # Note that c does NOT go to d
+        markov.parse(input_text)
+
+        self.assertEqual(
+            markov._chain['a'],
+            [Letter('b', 2), Letter('c', 1)]
+        )
+
     def test_parse_newlinest(self):
         # Newlines must be treated like any other character
 
