@@ -17,6 +17,8 @@ class StolasEbooks(ananas.PineappleBot):
 
         self.last_page = None
 
+        self.get_toots()
+
     def get_toots(self):
 
         users = self.mastodon.account_search(
@@ -64,8 +66,22 @@ class StolasEbooks(ananas.PineappleBot):
 
         self.markov.parse(text_content)
 
-    @ananas.interval(1)
-    def toot(self):
-        print("BANG!")
+    @ananas.interval(120)
+    def update_markov(self):
         self.get_toots()
-        print(self.markov.get_text(300))
+
+    @ananas.interval(60 * 55)
+    def toot(self):
+        status = self.markov.get_text(300)
+        self.mastodon.status_post(
+            status,
+            in_reply_to_id=None,
+        )
+
+    @ananas.reply
+    def reply_toot(self, mention, user):
+        status = self.markov.get_text(300)
+        self.mastodon.status_post(
+            '@{0} {1}'.format(user.acct, status),
+            in_reply_to_id=mention,
+        )
