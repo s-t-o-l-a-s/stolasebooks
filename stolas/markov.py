@@ -22,13 +22,11 @@ class MarkovChain(object):
         :param: order - Number of characters per word
         """
 
-        if type(order) is not int:
-            raise ValueError("Order must be int!")
+        self.order = int(order)
 
-        if order <= 0:
+        if self.order <= 0:
             raise ValueError("Order must be greater than zero!")
 
-        self.order = order
         self._chain = {}
         self._parsed = False
 
@@ -59,9 +57,6 @@ class MarkovChain(object):
 
         possible_letters = []
 
-        if key not in self._chain:
-            key = ""
-
         for letter in self._chain[key]:
             # HACK: Do this better
             for _ in range(letter.count):
@@ -81,9 +76,6 @@ class MarkovChain(object):
         if len(text) < self.order:
             raise ParseLengthError()
 
-        # Add the first characters to empty string key
-        self._add_word_to_chain("", text[0])
-
         for ii in text:
 
             # We never want to parse an @ sign
@@ -102,6 +94,13 @@ class MarkovChain(object):
         if not self._parsed:
             return ""
 
+        text = ""
+        while len(text) < length:
+            text += self._get_text(length - len(text))
+
+        return text
+
+    def _get_text(self, length):
         char_buffer = []
         current_length = 0
 
@@ -118,8 +117,11 @@ class MarkovChain(object):
         current_length += len(key)
 
         while len(char_buffer) < length:
-            next_character = self._get_random_letter(key)
-            char_buffer.append(next_character)
-            key = "".join(char_buffer)[-self.order:]
+            try:
+                next_character = self._get_random_letter(key)
+                char_buffer.append(next_character)
+                key = "".join(char_buffer)[-self.order:]
+            except KeyError:
+                return "".join(char_buffer)
 
         return "".join(char_buffer)

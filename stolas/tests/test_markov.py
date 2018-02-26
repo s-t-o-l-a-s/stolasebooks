@@ -26,7 +26,7 @@ class MarkovChainParseTestCase(unittest.TestCase):
 
         self.assertEqual(
             set(markov._chain.keys()),
-            set(['a', 'b', ''])
+            set(['a', 'b'])
         )
 
         self.assertEqual(
@@ -37,11 +37,6 @@ class MarkovChainParseTestCase(unittest.TestCase):
         self.assertEqual(
             markov._chain['b'],
             [Letter('c', 1)]
-        )
-
-        self.assertEqual(
-            markov._chain[''],
-            [Letter('a', 1)]
         )
 
     def test_at_sign_not_parsed(self):
@@ -57,7 +52,7 @@ class MarkovChainParseTestCase(unittest.TestCase):
 
         self.assertEqual(
             set(markov._chain.keys()),
-            set(['a', 'b', ''])
+            set(['a', 'b'])
         )
 
         self.assertEqual(
@@ -68,11 +63,6 @@ class MarkovChainParseTestCase(unittest.TestCase):
         self.assertEqual(
             markov._chain['b'],
             [Letter('c', 1)]
-        )
-
-        self.assertEqual(
-            markov._chain[''],
-            [Letter('a', 1)]
         )
 
     def test_parse_fails_when_input_too_short(self):
@@ -101,7 +91,7 @@ class MarkovChainParseTestCase(unittest.TestCase):
 
         self.assertEqual(
             set(markov._chain.keys()),
-            set(['a', 'b', 'd', 'e', ''])
+            set(['a', 'b', 'd', 'e'])
         )
 
         self.assertEqual(
@@ -124,11 +114,6 @@ class MarkovChainParseTestCase(unittest.TestCase):
             [Letter('f', 1)]
         )
 
-        self.assertEqual(
-            markov._chain[''],
-            [Letter('a', 1), Letter('d', 1)]
-        )
-
     def test_parse_newlinest(self):
         # Newlines must be treated like any other character
 
@@ -140,7 +125,7 @@ class MarkovChainParseTestCase(unittest.TestCase):
 
         self.assertEqual(
             set(markov._chain.keys()),
-            set(['a', 'b', '\n', ''])
+            set(['a', 'b', '\n'])
         )
 
         self.assertEqual(
@@ -156,11 +141,6 @@ class MarkovChainParseTestCase(unittest.TestCase):
         self.assertEqual(
             markov._chain['\n'],
             [Letter('b', 1), Letter('c', 1)]
-        )
-
-        self.assertEqual(
-            markov._chain[''],
-            [Letter('a', 1)]
         )
 
     def test_order_four_input(self):
