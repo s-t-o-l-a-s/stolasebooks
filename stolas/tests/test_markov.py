@@ -1,5 +1,5 @@
 import unittest
-from stolas.markov import MarkovChain, Letter, ParseLengthError
+from stolas.markov import MarkovChain, Letter
 
 
 class MarkovChainParseTestCase(unittest.TestCase):
@@ -21,7 +21,7 @@ class MarkovChainParseTestCase(unittest.TestCase):
         markov = MarkovChain(order=1)
         self.assertEqual(markov._chain, {})
 
-        input_text = "abc"
+        input_text = "a b c"
         markov.parse(input_text)
 
         self.assertEqual(
@@ -47,7 +47,7 @@ class MarkovChainParseTestCase(unittest.TestCase):
         markov = MarkovChain(order=1)
         self.assertEqual(markov._chain, {})
 
-        input_text = "ab@c"
+        input_text = "a b @d c"
         markov.parse(input_text)
 
         self.assertEqual(
@@ -65,15 +65,6 @@ class MarkovChainParseTestCase(unittest.TestCase):
             [Letter('c', 1)]
         )
 
-    def test_parse_fails_when_input_too_short(self):
-        # If order is less than the length of the string
-        # then a parse must fail with a ParseLengthError
-
-        markov = MarkovChain(order=1)
-
-        with self.assertRaises(ParseLengthError):
-            markov.parse('')
-
     def test_multiple_parse_calls(self):
         # Calling parse more than one should
         # append to the existing chain
@@ -82,8 +73,8 @@ class MarkovChainParseTestCase(unittest.TestCase):
         markov = MarkovChain(order=1)
         self.assertEqual(markov._chain, {})
 
-        input_text_one = "abc"
-        input_text_two = "def"
+        input_text_one = "a b c"
+        input_text_two = "d e f"
 
         # Note that c does NOT go to d
         markov.parse(input_text_one)
@@ -114,51 +105,28 @@ class MarkovChainParseTestCase(unittest.TestCase):
             [Letter('f', 1)]
         )
 
-    def test_duplicate_input_not_parsed(self):
-        # Calling parse more than one should
-        # append to the existing chain
-        # but each call should be seperate
-
-        markov = MarkovChain(order=1)
-        self.assertEqual(markov._chain, {})
-
-        input_text = "abacab"
-
-        # Note that c does NOT go to d
-        markov.parse(input_text)
-
-        self.assertEqual(
-            markov._chain['a'],
-            [Letter('b', 2), Letter('c', 1)]
-        )
-
     def test_parse_newlinest(self):
         # Newlines must be treated like any other character
 
         markov = MarkovChain(order=1)
         self.assertEqual(markov._chain, {})
 
-        input_text = "a\nb\nc"
+        input_text = "a \nb \nc\nAAA end"
         markov.parse(input_text)
 
         self.assertEqual(
             set(markov._chain.keys()),
-            set(['a', 'b', '\n'])
+            set(['a', '\nb', '\nc\nAAA'])
         )
 
         self.assertEqual(
             markov._chain['a'],
-            [Letter('\n', 1)]
+            [Letter('\nb', 1)]
         )
 
         self.assertEqual(
-            markov._chain['b'],
-            [Letter('\n', 1)]
-        )
-
-        self.assertEqual(
-            markov._chain['\n'],
-            [Letter('b', 1), Letter('c', 1)]
+            markov._chain['\nb'],
+            [Letter('\nc\nAAA', 1)]
         )
 
     def test_order_four_input(self):
@@ -169,22 +137,22 @@ class MarkovChainParseTestCase(unittest.TestCase):
 
         markov.parse(input_text)
 
-        self.assertIn("Acco", markov._chain.keys())
+        self.assertIn("According to all known", markov._chain.keys())
         self.assertEqual(
-            markov._chain["Acco"],
-            [Letter("r", 1)]
+            markov._chain["According to all known"],
+            [Letter("laws", 1)]
         )
 
-        self.assertIn("of a", markov._chain.keys())
+        self.assertIn("is no way a", markov._chain.keys())
         self.assertEqual(
-            markov._chain["of a"],
-            [Letter("v", 1)]
+            markov._chain["is no way a"],
+            [Letter("bee", 1)]
         )
 
-        self.assertIn(" fly", markov._chain.keys())
+        self.assertIn("should be able to", markov._chain.keys())
         self.assertEqual(
-            markov._chain[" fly"],
-            [Letter(".", 1)]
+            markov._chain["should be able to"],
+            [Letter("fly.", 1)]
         )
 
 
@@ -274,22 +242,10 @@ class MarkovChainGetTextTestCase(unittest.TestCase):
         output = markov.get_text()
         self.assertEqual(output, "")
 
-    def test_get_text_input(self):
-        # Parse method should set .chain correctly
-
-        markov = MarkovChain(order=1)
-        markov.parse("aba")
-
-        self.assertEqual(markov._parsed, True)
-
-        output = markov.get_text(length=10)
-        self.assertIn("ab", output)
-        self.assertIn("ba", output)
-
     def test_get_text_length(self):
 
         markov = MarkovChain(order=4)
-        markov.parse("ermeimfoiefmqmfimeqofeqmfe")
+        markov.parse("a b c d e f g")
 
         output = markov.get_text(length=200)
         self.assertGreaterEqual(len(output), 200)

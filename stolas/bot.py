@@ -43,11 +43,6 @@ class StolasEbooks(ananas.PineappleBot):
             return
 
         for status in statuses:
-            # self._max_status_id = max(
-            #     self._max_status_id,
-            #     status['id']
-            # )
-
             self.add_toot_to_corpus(status)
 
     def add_toot_to_corpus(self, toot):
@@ -70,7 +65,7 @@ class StolasEbooks(ananas.PineappleBot):
     def update_markov(self):
         self.get_toots()
 
-    @ananas.interval(60 * 55)
+    @ananas.interval(60 * 31)
     def toot(self):
         status = self.markov.get_text(300)
         self.mastodon.status_post(

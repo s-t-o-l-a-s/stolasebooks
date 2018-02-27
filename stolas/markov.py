@@ -30,8 +30,7 @@ class MarkovChain(object):
         self._chain = {}
         self._parsed = False
 
-    def _add_word_to_chain(self, char_buffer, new_character):
-        word = "".join(char_buffer)
+    def _add_word_to_chain(self, word, new_character):
 
         if word not in self._chain:
             self._chain[word] = []
@@ -71,27 +70,25 @@ class MarkovChain(object):
 
         self._parsed = True
 
-        char_buffer = []
+        words = []
 
-        if len(text) < self.order:
-            raise ParseLengthError()
-
-        for ii in text:
-
-            # We never want to parse an @ sign
-            if ii == "@":
+        for word in text.split(" "):
+            if word.startswith("@"):
                 continue
 
-            if len(char_buffer) == self.order:
-                self._add_word_to_chain("".join(char_buffer), ii)
-                del char_buffer[0]
-
-            char_buffer.append(ii)
+            if len(words) == self.order:
+                word_key = " ".join(words)
+                self._add_word_to_chain(word_key, word)
+                del words[0]
+            words.append(word)
 
     def get_text(self, length=400):
         """Get text from this chain"""
 
         if not self._parsed:
+            return ""
+
+        if not self._chain.keys():
             return ""
 
         text = ""
@@ -121,7 +118,7 @@ class MarkovChain(object):
                 next_character = self._get_random_letter(key)
                 char_buffer.append(next_character)
                 key = "".join(char_buffer)[-self.order:]
-            except KeyError:
+            except (KeyError, IndexError):
                 return "".join(char_buffer)
 
         return "".join(char_buffer)
