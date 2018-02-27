@@ -1,5 +1,5 @@
 import unittest
-from stolas.markov import MarkovChain, Letter
+from stolas.markov import MarkovChain, Word
 
 
 class MarkovChainParseTestCase(unittest.TestCase):
@@ -31,12 +31,12 @@ class MarkovChainParseTestCase(unittest.TestCase):
 
         self.assertEqual(
             markov._chain['a'],
-            [Letter('b', 1)]
+            [Word('b', 1)]
         )
 
         self.assertEqual(
             markov._chain['b'],
-            [Letter('c', 1)]
+            [Word('c', 1)]
         )
 
     def test_at_sign_not_parsed(self):
@@ -57,12 +57,12 @@ class MarkovChainParseTestCase(unittest.TestCase):
 
         self.assertEqual(
             markov._chain['a'],
-            [Letter('b', 1)]
+            [Word('b', 1)]
         )
 
         self.assertEqual(
             markov._chain['b'],
-            [Letter('c', 1)]
+            [Word('c', 1)]
         )
 
     def test_multiple_parse_calls(self):
@@ -87,22 +87,22 @@ class MarkovChainParseTestCase(unittest.TestCase):
 
         self.assertEqual(
             markov._chain['a'],
-            [Letter('b', 1)]
+            [Word('b', 1)]
         )
 
         self.assertEqual(
             markov._chain['b'],
-            [Letter('c', 1)]
+            [Word('c', 1)]
         )
 
         self.assertEqual(
             markov._chain['d'],
-            [Letter('e', 1)]
+            [Word('e', 1)]
         )
 
         self.assertEqual(
             markov._chain['e'],
-            [Letter('f', 1)]
+            [Word('f', 1)]
         )
 
     def test_parse_newlinest(self):
@@ -121,12 +121,12 @@ class MarkovChainParseTestCase(unittest.TestCase):
 
         self.assertEqual(
             markov._chain['a'],
-            [Letter('\nb', 1)]
+            [Word('\nb', 1)]
         )
 
         self.assertEqual(
             markov._chain['\nb'],
-            [Letter('\nc\nAAA', 1)]
+            [Word('\nc\nAAA', 1)]
         )
 
     def test_order_four_input(self):
@@ -140,36 +140,36 @@ class MarkovChainParseTestCase(unittest.TestCase):
         self.assertIn("According to all known", markov._chain.keys())
         self.assertEqual(
             markov._chain["According to all known"],
-            [Letter("laws", 1)]
+            [Word("laws", 1)]
         )
 
         self.assertIn("is no way a", markov._chain.keys())
         self.assertEqual(
             markov._chain["is no way a"],
-            [Letter("bee", 1)]
+            [Word("bee", 1)]
         )
 
         self.assertIn("should be able to", markov._chain.keys())
         self.assertEqual(
             markov._chain["should be able to"],
-            [Letter("fly.", 1)]
+            [Word("fly.", 1)]
         )
 
 
-class MarkovChainRandomLetterTestCase(unittest.TestCase):
-    """Tests for MarkovChain._get_random_letter"""
+class MarkovChainRandomWordTestCase(unittest.TestCase):
+    """Tests for MarkovChain._get_random_word"""
 
     def test_single_option(self):
 
         markov = MarkovChain()
         markov._chain = {
             'START': [
-                Letter('A', 1)
+                Word('A', 1)
             ]
         }
 
         for _ in range(1000):
-            letter = markov._get_random_letter('START')
+            letter = markov._get_random_word('START')
             self.assertEqual(letter, 'A')
 
     def test_even_odds(self):
@@ -177,15 +177,15 @@ class MarkovChainRandomLetterTestCase(unittest.TestCase):
         markov = MarkovChain()
         markov._chain = {
             'START': [
-                Letter('A', 10),
-                Letter('B', 10)
+                Word('A', 10),
+                Word('B', 10)
             ]
         }
 
         a_count = 0
         b_count = 0
         for _ in range(10000):
-            letter = markov._get_random_letter('START')
+            letter = markov._get_random_word('START')
 
             if letter == 'A':
                 a_count += 1
@@ -205,15 +205,15 @@ class MarkovChainRandomLetterTestCase(unittest.TestCase):
         markov = MarkovChain()
         markov._chain = {
             'START': [
-                Letter('A', 10),
-                Letter('B', 1)
+                Word('A', 10),
+                Word('B', 1)
             ]
         }
 
         a_count = 0
         b_count = 0
         for _ in range(10000):
-            letter = markov._get_random_letter('START')
+            letter = markov._get_random_word('START')
 
             if letter == 'A':
                 a_count += 1
@@ -249,6 +249,16 @@ class MarkovChainGetTextTestCase(unittest.TestCase):
 
         output = markov.get_text(length=200)
         self.assertGreaterEqual(len(output), 200)
+
+    def test_run_on_bug(self):
+        # There is a bug causing the ends of sentences
+        # to get mauled
+
+        markov = MarkovChain(order=2)
+        markov.parse("a b a b a b a b a b")
+
+        output = markov.get_text(1000)
+        self.assertNotIn("ab", output)
 
 
 class MarkovChainErrorTestCase(unittest.TestCase):

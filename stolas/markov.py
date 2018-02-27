@@ -1,7 +1,7 @@
 from collections import namedtuple
 import random
 
-Letter = namedtuple('Letter', ['character', 'count'])
+Word = namedtuple('Word', ['character', 'count'])
 
 
 class ParseLengthError(Exception):
@@ -35,33 +35,33 @@ class MarkovChain(object):
         if word not in self._chain:
             self._chain[word] = []
 
-        for index, existing_letters in enumerate(self._chain[word]):
-            if existing_letters.character == new_character:
+        for index, existing_words in enumerate(self._chain[word]):
+            if existing_words.character == new_character:
 
                 # Increment the existing character
-                self._chain[word][index] = Letter(
+                self._chain[word][index] = Word(
                     new_character,
-                    existing_letters.count + 1
+                    existing_words.count + 1
                 )
 
                 return
 
         # Not found, add a new one
         self._chain[word].append(
-            Letter(new_character, 1)
+            Word(new_character, 1)
         )
 
-    def _get_random_letter(self, key):
-        """Get a weighted random Letter from the chain"""
+    def _get_random_word(self, key):
+        """Get a weighted random Word from the chain"""
 
-        possible_letters = []
+        possible_words = []
 
-        for letter in self._chain[key]:
+        for word in self._chain[key]:
             # HACK: Do this better
-            for _ in range(letter.count):
-                possible_letters.append(letter.character)
+            for _ in range(word.count):
+                possible_words.append(word.character)
 
-        return random.choice(possible_letters)
+        return random.choice(possible_words)
 
     def parse(self, text):
         """Add text to the current chain.
@@ -91,14 +91,16 @@ class MarkovChain(object):
         if not self._chain.keys():
             return ""
 
-        text = ""
-        while len(text) < length:
-            text += self._get_text(length - len(text))
+        sentences = []
+        current_output = ""
+        while len(current_output) < length:
+            sentences.append(self._get_text(length))
+            current_output = " ".join(sentences)
 
-        return text
+        return current_output
 
     def _get_text(self, length):
-        char_buffer = []
+        word_buffer = []
         current_length = 0
 
         # Start with a random key from the chain
@@ -109,16 +111,16 @@ class MarkovChain(object):
         key = random.choice(
             list(self._chain.keys())
         )
-        char_buffer.append(key)
+        word_buffer.append(key)
 
         current_length += len(key)
 
-        while len(char_buffer) < length:
+        while len(word_buffer) < length:
             try:
-                next_character = self._get_random_letter(key)
-                char_buffer.append(next_character)
-                key = "".join(char_buffer)[-self.order:]
+                next_word = self._get_random_word(key)
+                word_buffer.append(next_word)
+                key = " ".join(word_buffer)[-self.order:]
             except (KeyError, IndexError):
-                return "".join(char_buffer)
+                return " ".join(word_buffer)
 
-        return "".join(char_buffer)
+        return " ".join(word_buffer)
