@@ -155,6 +155,35 @@ class MarkovChainParseTestCase(unittest.TestCase):
             [Word("fly.", 1)]
         )
 
+    def test_duplicate_parsing_files(self):
+        input_text = ("According to all known laws of aviation,"
+                      "there is no way a bee should be able to fly.")
+
+        markov = MarkovChain(order=4)
+
+        markov.parse(input_text)
+        markov.parse(input_text)
+        markov.parse(input_text)
+        markov.parse(input_text)
+
+        self.assertIn("According to all known", markov._chain.keys())
+        self.assertEqual(
+            markov._chain["According to all known"],
+            [Word("laws", 1)]
+        )
+
+        self.assertIn("is no way a", markov._chain.keys())
+        self.assertEqual(
+            markov._chain["is no way a"],
+            [Word("bee", 1)]
+        )
+
+        self.assertIn("should be able to", markov._chain.keys())
+        self.assertEqual(
+            markov._chain["should be able to"],
+            [Word("fly.", 1)]
+        )
+
 
 class MarkovChainRandomWordTestCase(unittest.TestCase):
     """Tests for MarkovChain._get_random_word"""

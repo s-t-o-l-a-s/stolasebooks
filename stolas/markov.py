@@ -29,6 +29,7 @@ class MarkovChain(object):
 
         self._chain = {}
         self._parsed = False
+        self._existing_corpus = set()
 
     def _add_word_to_chain(self, word, new_character):
 
@@ -67,6 +68,11 @@ class MarkovChain(object):
         """Add text to the current chain.
 
         :param: text - Input string"""
+
+        if text in self._existing_corpus:
+            return
+
+        self._existing_corpus.add(text)
 
         self._parsed = True
 

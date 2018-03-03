@@ -4,6 +4,8 @@
 
 # Do not commit the actual live config file that contains my access key
 stolas_bot.conf
+_corpus.sqlite3
+stolas_bot.sublime-workspace
 
 # End custom
 
