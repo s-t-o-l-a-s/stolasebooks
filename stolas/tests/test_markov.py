@@ -280,7 +280,7 @@ class MarkovChainGetTextTestCase(unittest.TestCase):
         self.assertGreaterEqual(len(output), 200)
 
     def test_run_on_bug(self):
-        # There is a bug causing the ends of sentences
+        # There was a bug causing the ends of sentences
         # to get mauled
 
         markov = MarkovChain(order=2)
@@ -288,6 +288,16 @@ class MarkovChainGetTextTestCase(unittest.TestCase):
 
         output = markov.get_text(1000)
         self.assertNotIn("ab", output)
+
+    def test_start_words_used(self):
+        # Check that we actually use the start words
+
+        markov = MarkovChain(order=1)
+        markov.parse("a b c b c b c b c b")
+
+        output = markov.get_text(1000)
+        if not output.startswith("a"):
+            self.fail("Output did not start with a!")
 
 
 class MarkovChainErrorTestCase(unittest.TestCase):
@@ -303,3 +313,54 @@ class MarkovChainErrorTestCase(unittest.TestCase):
     def test_order_string_raises_exception(self):
         with self.assertRaises(ValueError):
             MarkovChain(order="four")
+
+
+class MarkovChainSentenceStartTestCase(unittest.TestCase):
+    """Tests for MarkovChain.start_words"""
+
+    def test_null_parsing(self):
+        # We should have an empty list for start_words
+        # if we have not parsed owt
+
+        markov = MarkovChain(order=2)
+
+        self.assertEqual(markov._start_words, [])
+
+    def test_single_input_order_one(self):
+        input_text = ("According to all known laws of aviation,"
+                      "there is no way a bee should be able to fly.")
+
+        markov = MarkovChain(order=1)
+
+        markov.parse(input_text)
+
+        self.assertEqual(
+            markov._start_words,
+            ["According"]
+        )
+
+    def test_single_input_order_four(self):
+        input_text = ("According to all known laws of aviation,"
+                      "there is no way a bee should be able to fly.")
+
+        markov = MarkovChain(order=4)
+
+        markov.parse(input_text)
+
+        self.assertEqual(
+            markov._start_words,
+            ["According to all known"]
+        )
+
+    def test_multiple_inputs(self):
+        markov = MarkovChain(order=1)
+
+        markov.parse("Hello there!")
+        markov.parse("Tired: Single line content\n"
+                     "Wired: Multiple lines of content")
+        markov.parse("Yet more content")
+
+        self.assertEqual(
+            markov._start_words,
+            ["Hello", "Tired:", "Yet"]
+        )

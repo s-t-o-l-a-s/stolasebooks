@@ -28,6 +28,7 @@ class MarkovChain(object):
             raise ValueError("Order must be greater than zero!")
 
         self._chain = {}
+        self._start_words = []
         self._parsed = False
         self._existing_corpus = set()
 
@@ -74,6 +75,11 @@ class MarkovChain(object):
 
         self._existing_corpus.add(text)
 
+        all_words = text.split(" ")
+        self._start_words.append(
+            " ".join(all_words[:self.order])
+        )
+
         self._parsed = True
 
         words = []
@@ -114,9 +120,7 @@ class MarkovChain(object):
         # Take one of the Letters in values and use it
         # Then take the current latest
 
-        key = random.choice(
-            list(self._chain.keys())
-        )
+        key = random.choice(self._start_words)
         word_buffer.append(key)
 
         current_length += len(key)
