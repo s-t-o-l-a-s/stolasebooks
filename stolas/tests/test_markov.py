@@ -364,3 +364,13 @@ class MarkovChainSentenceStartTestCase(unittest.TestCase):
             markov._start_words,
             ["Hello", "Tired:", "Yet"]
         )
+
+    def test_at_filtered_out(self):
+        markov = MarkovChain(order=1)
+
+        markov.parse("@a_person Hello there!")
+
+        self.assertEqual(
+            markov._start_words,
+            ["Hello"]
+        )

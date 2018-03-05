@@ -65,17 +65,27 @@ class MarkovChain(object):
 
         return random.choice(possible_words)
 
-    def parse(self, text):
+    def clean_text(self, raw_text):
+
+        words = raw_text.split(" ")
+
+        return " ".join(
+            filter(lambda x: not x.startswith("@"), words)
+        )
+
+    def parse(self, raw_text):
         """Add text to the current chain.
 
-        :param: text - Input string"""
+        :param: raw_text - Input string"""
 
-        if text in self._existing_corpus:
+        safe_text = self.clean_text(raw_text)
+
+        if safe_text in self._existing_corpus:
             return
 
-        self._existing_corpus.add(text)
+        self._existing_corpus.add(safe_text)
 
-        all_words = text.split(" ")
+        all_words = safe_text.split(" ")
         self._start_words.append(
             " ".join(all_words[:self.order])
         )
@@ -84,7 +94,7 @@ class MarkovChain(object):
 
         words = []
 
-        for word in text.split(" "):
+        for word in safe_text.split(" "):
             if word.startswith("@"):
                 continue
 
