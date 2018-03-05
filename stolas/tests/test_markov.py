@@ -277,7 +277,7 @@ class MarkovChainGetTextTestCase(unittest.TestCase):
         markov.parse("a b c d e f g")
 
         output = markov.get_text(length=200)
-        self.assertGreaterEqual(len(output), 200)
+        self.assertLessEqual(len(output), 200)
 
     def test_run_on_bug(self):
         # There was a bug causing the ends of sentences
@@ -351,6 +351,8 @@ class MarkovChainSentenceStartTestCase(unittest.TestCase):
             markov._start_words,
             ["According to all known"]
         )
+
+        self.assertIn(markov._start_words[0], markov._chain.keys())
 
     def test_multiple_inputs(self):
         markov = MarkovChain(order=1)

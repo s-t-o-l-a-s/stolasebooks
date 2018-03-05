@@ -113,15 +113,6 @@ class MarkovChain(object):
         if not self._chain.keys():
             return ""
 
-        sentences = []
-        current_output = ""
-        while len(current_output) < length:
-            sentences.append(self._get_text(length))
-            current_output = " ".join(sentences)
-
-        return current_output
-
-    def _get_text(self, length):
         word_buffer = []
         current_length = 0
 
@@ -139,8 +130,10 @@ class MarkovChain(object):
             try:
                 next_word = self._get_random_word(key)
                 word_buffer.append(next_word)
-                key = " ".join(word_buffer)[-self.order:]
+                # HACK: Fix this later
+                words = " ".join(word_buffer).split(" ")
+                key = " ".join(words[-self.order:])
             except (KeyError, IndexError):
-                return " ".join(word_buffer)
+                break
 
         return " ".join(word_buffer)

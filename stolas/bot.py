@@ -130,14 +130,13 @@ class StolasEbooks(ananas.PineappleBot):
     def update_markov(self):
         self.get_recent_toots()
 
-    @ananas.interval(5)
+    @ananas.interval(60 * 42)
     def toot(self):
         status = self.markov.get_text(300)
-        print(status)
-        # self.mastodon.status_post(
-        #     status,
-        #     in_reply_to_id=None,
-        # )
+        self.mastodon.status_post(
+            status,
+            in_reply_to_id=None,
+        )
 
     @ananas.reply
     def reply_toot(self, mention, user):
